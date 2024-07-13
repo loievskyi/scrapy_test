@@ -1,6 +1,5 @@
-import pprint
 import re
-from typing import Any, List
+from typing import List, Generator
 
 import scrapy
 from scrapy.http import Response
@@ -13,7 +12,7 @@ class KelmImmobilienSpider(scrapy.Spider):
     allowed_domains = ["kelm-immobilien.de"]
     start_urls = ["https://kelm-immobilien.de/immobilien/"]
 
-    def parse(self, response: Response, **kwargs: Any) -> Any:
+    def parse(self, response: Response, **kwargs) -> Generator:
         details_urls = response.css(
             "div.property-container "
             "a.btn.btn-default.btn-sm[role='button']"
@@ -26,8 +25,8 @@ class KelmImmobilienSpider(scrapy.Spider):
         if next_page is not None:
             yield response.follow(next_page, self.parse)
 
-    def parse_details(self, response: Response, **kwargs: Any) -> Any:
-        item = RentalItem(
+    def parse_details(self, response: Response) -> RentalItem:
+        return RentalItem(
             url=response.url,
             title=self._get_title(response),
             status=self._get_status(response),
@@ -37,8 +36,6 @@ class KelmImmobilienSpider(scrapy.Spider):
             phone_number=self._get_phone_number(response),
             email=self._get_email(response),
         )
-        pprint.pprint(item)
-        return item
 
     def _get_title(self, response: Response) -> str | None:
         return response.css("h1.property-title::text").get()
