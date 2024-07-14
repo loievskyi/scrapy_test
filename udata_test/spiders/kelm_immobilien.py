@@ -52,7 +52,7 @@ class KelmImmobilienSpider(scrapy.Spider):
 
     def _convert_price(self, price: str) -> float | None:
         try:
-            price = price.replace(".", "")
+            price = price.replace(".", "").replace(",", ".")
             price = re.sub(r"[^\d.,]", "", price)
             return float(price)
         except Exception:
